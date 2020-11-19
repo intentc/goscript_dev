@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"sync"
 	"time"
 )
@@ -13,22 +14,36 @@ var rwlock sync.RWMutex
 func testmap() {
 	var a map[int]int
 	a = make(map[int]int, 5)
-	a[1] = 10
-	a[2] = 10
-	a[3] = 10
-	a[4] = 10
-	a[5] = 10
+	a[11] = 10
+	a[21] = 10
+	a[31] = 10
+	a[41] = 10
+	a[51] = 10
+
+	var keys []int
+	for k := range a {
+		keys = append(keys, k)
+	}
+
+	sort.Ints(keys)
+
+	for _, v := range keys {
+		fmt.Println(v, a[v])
+	}
+
+	//	b := make(map[int]int)
+
 	for i := 0; i < 2; i++ {
 		go func(b map[int]int) {
-			lock.Lock()
-			b[1] = rand.Intn(100)
-			lock.Unlock()
+			rwlock.Lock()
+			b[11] = rand.Intn(100)
+			rwlock.Unlock()
 
 		}(a)
 
-		lock.Lock()
+		rwlock.RLock()
 		fmt.Println(a)
-		lock.Unlock()
+		rwlock.RUnlock()
 
 		time.Sleep(time.Second)
 	}
@@ -36,6 +51,6 @@ func testmap() {
 
 func main() {
 	testmap()
-	fmt.Printf("pass")
+	fmt.Println("pass")
 
 }
